@@ -1,36 +1,29 @@
-library ieee;
-use ieee.std_logic_1164.all;
-
-
+LIBRARY ieee;
+USE ieee.std_logic_1164.ALL;
 -- Untuk M (Money)
--- 00 = Tidak ada
--- 01 = 5K
--- 10 = 10K
--- 11 = 20K
-
+-- 000 = Tidak ada
+-- 001 = 5K
+-- 010 = 10K
+-- 011 = 20K
+-- 100 = 50K
+-- 101 = 100K
 -- Untuk T (Ticket)
 -- 00 = Tidak ada
 -- 01 = 5K
 -- 10 = 10K
 -- 11 = 15K
-
---- Untuk C1 dan C2 (Change)
--- 00 = 0
--- 01 = 5K
--- 10 = 10K
--- 11 = Tidak ada
-
-
-entity Ticket_Machine is
-	port(
-		CLK : in std_logic;
-		M, T : in std_logic_vector (1 downto 0);
-		C1, C2, O : out std_logic_vector (1 downto 0)
+ENTITY Ticket_Machine IS
+	PORT (
+		CLK : IN STD_LOGIC;
+		M : IN STD_LOGIC_VECTOR (2 DOWNTO 0);
+		T : IN STD_LOGIC_VECTOR (1 DOWNTO 0);
+		C1, C2, C3, C4 : OUT STD_LOGIC_VECTOR (2 DOWNTO 0);
+		O : OUT STD_LOGIC_VECTOR (1 DOWNTO 0)
 	);
-end Ticket_Machine;
+END Ticket_Machine;
 
-architecture behaviour of Ticket_Machine is
-	type state_types is (S0, S1, S2, S3, S4, S5, S6, S7, S8);
+ARCHITECTURE behaviour OF Ticket_Machine IS
+	TYPE state_types IS (S0, S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, S12, S13, S14);
 
 	-- S0 = idle
 	-- S1 = pilih tiket 5K
@@ -40,90 +33,193 @@ architecture behaviour of Ticket_Machine is
 	-- S5 = kembali 5K
 	-- S6 = kembali 10K
 	-- S7 = kembali 15K (10K + 5K)
-	-- S8 = keluar tiket
+	-- S8 = kembali 35K (10K + 5K)
+	-- S9 = kembali 40K (10K + 5K)
+	-- S10 = kembali 45K (10K + 5K)
+	-- S11 = kembali 85K (10K + 5K)
+	-- S12 = kembali 80K (10K + 5K)
+	-- S13 = kembali 95K (10K + 5K)
+	-- S14 = keluar tiket
 
-	signal PS, NS : state_types;
-begin
-	sync_proc : process(CLK, NS)
-	begin
-		if(rising_edge(CLK)) then PS <= NS;
-		end if;
-	end process;
-	
-	comb_proc : process(PS, M, T)
-	begin
-		C1 <= "00";
-		C2 <= "00";
+	SIGNAL PS, NS : state_types;
+BEGIN
+	sync_proc : PROCESS (CLK, NS)
+	BEGIN
+		IF (rising_edge(CLK)) THEN
+			PS <= NS;
+		END IF;
+	END PROCESS;
+
+	comb_proc : PROCESS (PS, M, T)
+	BEGIN
+		C1 <= "000"; -- 0
+		C2 <= "000"; -- 0
+		C3 <= "000"; -- 0
+		C4 <= "000"; -- 0
 		O <= "00";
 
-		case PS is
+		CASE PS IS
 
-			when S0 => -- idle
-				if(T = "00" or M /= "00") then NS <= S0;-- input invalid
+			WHEN S0 => -- idle
+				IF (T = "00" OR M /= "000") THEN
+					NS <= S0;-- input invalid
 
-				elsif(T = "01" and M = "00") then NS <= S1; -- tiket 5K
+				ELSIF (T = "01" AND M = "000") THEN
+					NS <= S1; -- tiket 5K
 
-				elsif(T = "10" and M = "00") then NS <= S2;-- tiket 10K
+				ELSIF (T = "10" AND M = "000") THEN
+					NS <= S2;-- tiket 10K
 
-				elsif(T = "11" and M = "00") then NS <= S3; -- tiket 15K
-				end if;
+				ELSIF (T = "11" AND M = "000") THEN
+					NS <= S3; -- tiket 15K
+				END IF;
 
-			when S1 => -- tiket 5K
-				-- kembali 0
-				if(M = "01") then NS <= S4; -- kembali 0
-				
-				elsif(M = "10") then NS <= S5; -- kembali 5K
+			WHEN S1 => -- tiket 5K
+				IF (M = "000") THEN
+					NS <= S1; -- kembali ke S0
 
-				elsif(M = "11") then NS <= S7; -- kembali 15K --> 10 + 5
-				end if;
+				ELSIF (M = "001") THEN
+					NS <= S4; -- kembali 0K
 
-			when S2 => -- tiket 10K
-				if(M = "01") then NS <= S1; -- sisa 5K
+				ELSIF (M = "010") THEN
+					NS <= S5; -- kembali 5k
 
-				elsif(M = "10") then NS <= S4; -- kembali 0
-				
-				elsif(M = "11") then NS <= S6; -- kembali 10K
-				end if;
+				ELSIF (M = "011") THEN
+					NS <= S7; -- kembali 15K --> 10 + 5
 
-			when S3 => -- tiket 15K
-				if(M = "01") then NS <= S2; -- sisa 10K
+				ELSIF (M = "100") THEN
+					NS <= S10; -- kembali 45K --> 40 + 5
 
-				elsif(M = "10") then NS <= S1; -- sisa 5K
+				ELSIF (M = "101") THEN
+					NS <= S13; -- kembali 95K --> 50 + 20 + 20 + 5
 
-				elsif(M = "11") then NS <= S5; -- kembali 5K
-				end if;
+				END IF;
 
-			when S4 => -- kembali 0
-				C1 <= "00"; -- 0
+			WHEN S2 => -- tiket 10K
+				IF (M = "000") THEN
+					NS <= S0; -- kembali ke S0
 
-				C2 <= "00"; -- 0
-				NS <= S8;
+				ELSIF (M = "001") THEN
+					NS <= S1; -- sisa 5k
 
-			when S5 => -- kembali 5K
-				C1 <= "01"; -- 5K
+				ELSIF (M = "010") THEN
+					NS <= S4; -- kembali 0
 
-				C2 <= "00"; -- 0
-				NS <= S8;
+				ELSIF (M = "011") THEN
+					NS <= S6; -- kembali 10k
 
-			when S6 => -- kembali 10K
-				C1 <= "10"; -- 10K
+				ELSIF (M = "100") THEN
+					NS <= S9; -- kembali 40k
 
-				C2 <= "00"; -- 0
-				NS <= S8;
+				ELSIF (M = "101") THEN
+					NS <= S12; -- kembali 90k
 
-			when S7 => -- kembali 15K (10K + 5K)
-				C1 <= "10"; -- 10K
-				
-				C2 <= "01"; -- 5K
-				NS <= S8;
+				END IF;
 
-			when S8 => -- keluar tiket
+			WHEN S3 => -- tiket 15K
+
+				IF (M = "000") THEN
+					NS <= S0; -- kembali ke S0
+
+				ELSIF (M = "001") THEN
+					NS <= S2; -- sisa 10k
+
+				ELSIF (M = "010") THEN
+					NS <= S1; -- sisa 5k
+
+				ELSIF (M = "011") THEN
+					NS <= S5; -- kembali 5k
+
+				ELSIF (M = "100") THEN
+					NS <= S8; -- kembali 35k
+
+				ELSIF (M = "101") THEN
+					NS <= S11; -- kembali 85k
+
+				END IF;
+				--- Untuk C1 dan C2 (Change)
+				-- 000 = 0
+				-- 001 = 5K
+				-- 010 = 10K
+				-- 011 = 20K
+				-- 100 = 50K
+			WHEN S4 => -- kembali 0
+				C1 <= "000"; -- 0
+				C2 <= "000"; -- 0
+				C3 <= "000"; -- 0
+				C4 <= "000"; -- 0
+				NS <= S14;
+
+			WHEN S5 => -- kembali 5K (5 + 0 + 0 + 0)
+				C1 <= "001"; -- 5
+				C2 <= "000"; -- 0
+				C3 <= "000"; -- 0
+				C4 <= "000"; -- 0
+				NS <= S14;
+
+			WHEN S6 => -- kembali 10K (10 + 0 + 0 + 0)
+				C1 <= "010"; -- 10
+				C2 <= "000"; -- 0
+				C3 <= "000"; -- 0
+				C4 <= "000"; -- 0
+				NS <= S14;
+
+			WHEN S7 => -- kembali 15K (10 + 5K + 0 + 0)
+				C1 <= "010"; -- 10
+				C2 <= "001"; -- 5
+				C3 <= "000"; -- 0
+				C4 <= "000"; -- 0
+				NS <= S14;
+
+			WHEN S8 => -- kembali 35K (20 + 10 + 5K + 0)
+				C1 <= "011"; -- 20
+				C2 <= "010"; -- 10
+				C3 <= "001"; -- 5
+				C4 <= "000"; -- 0
+				NS <= S14;
+
+			WHEN S9 => -- kembali 40K (20 + 20 + 0 + 0)
+				C1 <= "011"; -- 20
+				C2 <= "011"; -- 20
+				C3 <= "000"; -- 0
+				C4 <= "000"; -- 0
+				NS <= S14;
+
+			WHEN S10 => -- kembali 45K (20 + 20 + 5 + 0)
+				C1 <= "011"; -- 20
+				C2 <= "011"; -- 20
+				C3 <= "001"; -- 5
+				C4 <= "000"; -- 0
+				NS <= S14;
+
+			WHEN S11 => -- kembali 85K (50 + 20 + 10 + 5)
+				C1 <= "100"; -- 50
+				C2 <= "011"; -- 20
+				C3 <= "010"; -- 10
+				C4 <= "001"; -- 5
+				NS <= S14;
+
+			WHEN S12 => -- kembali 90K (50 + 20 + 20 + 0)
+				C1 <= "100"; -- 50
+				C2 <= "011"; -- 20
+				C3 <= "011"; -- 20
+				C4 <= "000"; -- 0
+				NS <= S14;
+
+			WHEN S13 => -- kembali 95K (50 + 20 + 20 + 5)
+				C1 <= "100"; -- 50
+				C2 <= "011"; -- 20
+				C3 <= "011"; -- 20
+				C4 <= "001"; -- 5
+				NS <= S14;
+
+			WHEN S14 => -- keluar tiket
 				O <= T;
 
 				NS <= S0;
 
-		end case;
+		END CASE;
 
-	end process;
+	END PROCESS;
 
-end behaviour;
+END behaviour;

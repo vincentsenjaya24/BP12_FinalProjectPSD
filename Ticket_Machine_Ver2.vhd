@@ -1,7 +1,5 @@
-library ieee;
-use ieee.std_logic_1164.all;
-
-
+LIBRARY ieee;
+USE ieee.std_logic_1164.ALL;
 -- Untuk M (Money)
 -- 000 = Tidak ada
 -- 001 = 1K
@@ -27,25 +25,23 @@ use ieee.std_logic_1164.all;
 -- 101 = 20K
 -- 110 = 50K
 -- 111 = 100K
-
-
-entity Ticket_Machine is
-	port(
-		CLK : in std_logic;
-		T 	: in std_logic_vector (1 downto 0);
-		M 	: in std_logic_vector (2 downto 0);
-		C	: out std_logic_vector (2 downto 0);
-		O	: out std_logic_vector(1 downto 0)
+ENTITY Ticket_Machine IS
+	PORT (
+		CLK : IN STD_LOGIC;
+		T : IN STD_LOGIC_VECTOR (1 DOWNTO 0);
+		M : IN STD_LOGIC_VECTOR (2 DOWNTO 0);
+		C : OUT STD_LOGIC_VECTOR (2 DOWNTO 0);
+		O : OUT STD_LOGIC_VECTOR(1 DOWNTO 0)
 		-- CLK 	= clock
 		-- T	= Jenis tiket
 		-- M 	= Jenis uang
 		-- C	= Jenis uang yang akan dikeluarkan
 		-- O	= Jenis tiket yang akan dikeluarkan
 	);
-end Ticket_Machine;
+END Ticket_Machine;
 
-architecture behaviour of Ticket_Machine is
-	type state_types is (S0, S1, S2, S3, S4, S5, S6);
+ARCHITECTURE behaviour OF Ticket_Machine IS
+	TYPE state_types IS (S0, S1, S2, S3, S4, S5, S6);
 	-- S0 = idle
 	-- S1 = pilih tiket 5K
 	-- S2 = pilih tiket 10K
@@ -56,135 +52,136 @@ architecture behaviour of Ticket_Machine is
 	-- S7 = kembali 15K (10K + 5K)
 	-- S8 = keluar tiket
 
-	signal PS, NS : state_types;
+	SIGNAL PS, NS : state_types;
 	-- PS = Present State
 	-- NS = Next State
-	
-	signal ticketPrice 	: INTEGER range 0 to 255 := 0;
-	signal inputMoney	: INTEGER range 0 to 255 := 0;
-	signal currentMoney : INTEGER range 0 to 255 := 0;
-	signal changeMoney	: INTEGER range 0 to 255 := 0;
+
+	SIGNAL ticketPrice : INTEGER RANGE 0 TO 255 := 0;
+	SIGNAL inputMoney : INTEGER RANGE 0 TO 255 := 0;
+	SIGNAL currentMoney : INTEGER RANGE 0 TO 255 := 0;
+	SIGNAL changeMoney : INTEGER RANGE 0 TO 255 := 0;
 	-- ticketPrice 	= Mengubah tipe tiket menjadi integer
 	-- inputMoney 	= Mengubah tipe input uang menjadi integer
 	-- currentMoney	= Melacak dan menghitung jumlah uang yang ada didalam mesin.
-	
-	
-begin
-	sync_proc : process(CLK)
-	begin
-		if(rising_edge(CLK)) then PS <= NS;
-		end if;
-	end process;
-	
-	comb_proc : process(PS, M, T)
-	-- variable
-	begin
-		case PS is
-			when S0 => -- idle
-				if(T = "00" or M /= "000") then NS <= S0;-- input invalid
-				else 
-					case T is
-						when "01" =>
-							ticketPrice <= 5;
-							NS	 	<= S1; 
-						when "10" =>
-							ticketPrice <= 10;
-							NS	 	<= S1; 
-						when "11" =>
-							ticketPrice <= 15;
-							NS	 	<= S1; 
-						when others =>
-							NS <= S0;
-					end case;
-				end if;
-				
-			when S1 => -- menunggu uang masuk
-				if(M = "000") then NS <= S1;
-				else
-					case M is
-					when "001" =>
-						inputMoney <= 1;
-						NS <= S2;
-					when "010" =>
-						inputMoney <= 2;
-						NS <= S2;
-					when "011" =>
-						inputMoney <= 5;
-						NS <= S2;
-					when "100" =>
-						inputMoney <= 10;
-						NS <= S2;
-					when "101" =>
-						inputMoney <= 20;
-						NS <= S2;
-					when "110" =>
-						inputMoney <= 50;
-						NS <= S2;
-					when "111" =>
-						inputMoney <= 100;
-						NS <= S2;
-					when others =>
-						NS <= S1;
-				end case;			
-				end if;
+BEGIN
+	sync_proc : PROCESS (CLK)
+	BEGIN
+		IF (rising_edge(CLK)) THEN
+			PS <= NS;
+		END IF;
+	END PROCESS;
 
-			when S2 => -- Menambahkan uang ke total dalam 
-				 currentMoney <= currentMoney + inputMoney;
-				 NS <= S3;
-				 
-			when S3 => -- Mencek apakah uang dalam machine melebihi harga tiket.
-				if currentMoney > ticketPrice then
+	comb_proc : PROCESS (PS, M, T)
+		-- variable
+	BEGIN
+		CASE PS IS
+			WHEN S0 => -- idle
+				IF (T = "00" OR M /= "000") THEN
+					NS <= S0;-- input invalid
+				ELSE
+					CASE T IS
+						WHEN "01" =>
+							ticketPrice <= 5;
+							NS <= S1;
+						WHEN "10" =>
+							ticketPrice <= 10;
+							NS <= S1;
+						WHEN "11" =>
+							ticketPrice <= 15;
+							NS <= S1;
+						WHEN OTHERS =>
+							NS <= S0;
+					END CASE;
+				END IF;
+
+			WHEN S1 => -- menunggu uang masuk
+				IF (M = "000") THEN
+					NS <= S1;
+				ELSE
+					CASE M IS
+						WHEN "001" =>
+							inputMoney <= 1;
+							NS <= S2;
+						WHEN "010" =>
+							inputMoney <= 2;
+							NS <= S2;
+						WHEN "011" =>
+							inputMoney <= 5;
+							NS <= S2;
+						WHEN "100" =>
+							inputMoney <= 10;
+							NS <= S2;
+						WHEN "101" =>
+							inputMoney <= 20;
+							NS <= S2;
+						WHEN "110" =>
+							inputMoney <= 50;
+							NS <= S2;
+						WHEN "111" =>
+							inputMoney <= 100;
+							NS <= S2;
+						WHEN OTHERS =>
+							NS <= S1;
+					END CASE;
+				END IF;
+
+			WHEN S2 => -- Menambahkan uang ke total dalam 
+				currentMoney <= currentMoney + inputMoney;
+				NS <= S3;
+
+			WHEN S3 => -- Mencek apakah uang dalam machine melebihi harga tiket.
+				IF currentMoney > ticketPrice THEN
 					O <= T;
 					changeMoney <= currentMoney - ticketPrice;
 					NS <= S5;
-				else
+				ELSE
 					NS <= S1;
-				end if;
+				END IF;
 
-			when S4 => -- Melakukan perhitungan uang kembalian.
-				if changeMoney >= 100 then
-					changeMoney <= changeMoney - 100;
-					C <= "111";
-				elsif changeMoney >= 50 then
-					changeMoney <= changeMoney - 50;
-					C <= "110";
-				elsif changeMoney >= 20 then 
-					changeMoney <= changeMoney - 20;
-					C <= "101";
-				elsif changeMoney >= 10 then
-					changeMoney <= changeMoney - 10;
-					C <= "100";
-				elsif changeMoney >= 5 then
-					changeMoney <= changeMoney - 5;
-					C <= "011";
-				elsif changeMoney >= 2 then
-					changeMoney <= changeMoney - 2;
-					C <= "010";
-				elsif changeMoney >= 1 then
-					changeMoney <= changeMoney - 1;
-					C <= "001";
-				else 
-					C <= "000";
-				end if;
+			WHEN S4 => -- Melakukan perhitungan uang kembalian.
+				WHILE(changeMoney > 0) LOOP
+					IF changeMoney >= 100 THEN
+						changeMoney <= changeMoney - 100;
+						C <= "111";
+					ELSIF changeMoney >= 50 THEN
+						changeMoney <= changeMoney - 50;
+						C <= "110";
+					ELSIF changeMoney >= 20 THEN
+						changeMoney <= changeMoney - 20;
+						C <= "101";
+					ELSIF changeMoney >= 10 THEN
+						changeMoney <= changeMoney - 10;
+						C <= "100";
+					ELSIF changeMoney >= 5 THEN
+						changeMoney <= changeMoney - 5;
+						C <= "011";
+					ELSIF changeMoney >= 2 THEN
+						changeMoney <= changeMoney - 2;
+						C <= "010";
+					ELSIF changeMoney >= 1 THEN
+						changeMoney <= changeMoney - 1;
+						C <= "001";
+					ELSE
+						C <= "000";
+					END IF;
+				END LOOP;
 				NS <= S5;
-				
-			when S5 => -- Mencek apakah uang masih ada yang perlu dikembalikan.
-				if changeMoney > 0 then
+
+			WHEN S5 => -- Mencek apakah uang masih ada yang perlu dikembalikan.
+				IF changeMoney > 0 THEN
 					NS <= S4;
-				else
+				ELSE
 					NS <= S6;
-				end if;
+				END IF;
 
-			when S6 => -- Reset
-				ticketPrice 	<= 0;
-				inputMoney		<= 0;
-				currentMoney 	<= 0;
-				changeMoney		<= 0;
+			WHEN S6 => -- Reset
+				ticketPrice <= 0;
+				inputMoney <= 0;
+				currentMoney <= 0;
+				changeMoney <= 0;
 				NS <= S0;
-			
+		END CASE;
 
-		end case;
+	END PROCESS;
 
-	end process;
-
-end behaviour;
+END behaviour;
