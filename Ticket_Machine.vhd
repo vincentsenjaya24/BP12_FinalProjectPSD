@@ -40,8 +40,7 @@ ARCHITECTURE behaviour OF Ticket_Machine IS
 	-- S12 = kembali 80K (10K + 5K)
 	-- S13 = kembali 95K (10K + 5K)
 	-- S14 = keluar tiket
-
-	SIGNAL PS, NS : state_types;
+	SIGNAL PS, NS, temp_NS : state_types;
 BEGIN
 	sync_proc : PROCESS (CLK, NS)
 	BEGIN
@@ -61,22 +60,22 @@ BEGIN
 		CASE PS IS
 
 			WHEN S0 => -- idle
-				IF (T = "00" OR M /= "000") THEN
+				IF (T = "00" OR M = "000") THEN
 					NS <= S0;-- input invalid
 
-				ELSIF (T = "01" AND M = "000") THEN
+				ELSIF (T = "01" AND M /= "000") THEN
 					NS <= S1; -- tiket 5K
 
-				ELSIF (T = "10" AND M = "000") THEN
+				ELSIF (T = "10" AND M /= "000") THEN
 					NS <= S2;-- tiket 10K
 
-				ELSIF (T = "11" AND M = "000") THEN
+				ELSIF (T = "11" AND M /= "000") THEN
 					NS <= S3; -- tiket 15K
 				END IF;
-
+				
 			WHEN S1 => -- tiket 5K
 				IF (M = "000") THEN
-					NS <= S1; -- kembali ke S0
+					NS <= S0; -- kembali ke S0
 
 				ELSIF (M = "001") THEN
 					NS <= S4; -- kembali 0K

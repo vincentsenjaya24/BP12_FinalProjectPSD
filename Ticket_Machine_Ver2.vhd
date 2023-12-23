@@ -133,7 +133,7 @@ BEGIN
 				IF currentMoney > ticketPrice THEN
 					O <= T;
 					changeMoney <= currentMoney - ticketPrice;
-					NS <= S5;
+					NS <= S4;
 				ELSE
 					NS <= S1;
 				END IF;
