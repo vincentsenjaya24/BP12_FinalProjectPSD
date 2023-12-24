@@ -42,6 +42,8 @@ END Ticket_Machine;
 
 ARCHITECTURE behaviour OF Ticket_Machine IS
 	TYPE state_types IS (S0, S1, S2, S3, S4, S5, S6);
+	TYPE t_changes_array IS ARRAY (0 TO 3) OF INTEGER;
+	SIGNAL changes_array : t_changes_array := (0, 0, 0, 0);
 	-- S0 = idle
 	-- S1 = pilih tiket 5K
 	-- S2 = pilih tiket 10K
@@ -55,7 +57,7 @@ ARCHITECTURE behaviour OF Ticket_Machine IS
 	SIGNAL PS, NS : state_types;
 	-- PS = Present State
 	-- NS = Next State
-
+	SIGNAL currentIndex : INTEGER := 0;
 	SIGNAL ticketPrice : INTEGER RANGE 0 TO 255 := 0;
 	SIGNAL inputMoney : INTEGER RANGE 0 TO 255 := 0;
 	SIGNAL currentMoney : INTEGER RANGE 0 TO 255 := 0;
@@ -130,7 +132,7 @@ BEGIN
 				NS <= S3;
 
 			WHEN S3 => -- Mencek apakah uang dalam machine melebihi harga tiket.
-				IF currentMoney > ticketPrice THEN
+				IF currentMoney >= ticketPrice THEN
 					O <= T;
 					changeMoney <= currentMoney - ticketPrice;
 					NS <= S4;
@@ -141,28 +143,44 @@ BEGIN
 			WHEN S4 => -- Melakukan perhitungan uang kembalian.
 				IF changeMoney >= 100 THEN
 					changeMoney <= changeMoney - 100;
+					changes_array(currentIndex) <= 100;
 					C <= "111";
 				ELSIF changeMoney >= 50 THEN
 					changeMoney <= changeMoney - 50;
+					changes_array(currentIndex) <= 50;
+
 					C <= "110";
 				ELSIF changeMoney >= 20 THEN
 					changeMoney <= changeMoney - 20;
+					changes_array(currentIndex) <= 20;
+
 					C <= "101";
 				ELSIF changeMoney >= 10 THEN
 					changeMoney <= changeMoney - 10;
+					changes_array(currentIndex) <= 10;
+
 					C <= "100";
 				ELSIF changeMoney >= 5 THEN
 					changeMoney <= changeMoney - 5;
+					changes_array(currentIndex) <= 5;
+
 					C <= "011";
 				ELSIF changeMoney >= 2 THEN
 					changeMoney <= changeMoney - 2;
+					changes_array(currentIndex) <= 2;
+
 					C <= "010";
 				ELSIF changeMoney >= 1 THEN
 					changeMoney <= changeMoney - 1;
+					changes_array(currentIndex) <= 1;
+
 					C <= "001";
 				ELSE
 					C <= "000";
+					changes_array(currentIndex) <= 0;
+
 				END IF;
+				currentIndex <= currentIndex + 1;
 				NS <= S5;
 
 			WHEN S5 => -- Mencek apakah uang masih ada yang perlu dikembalikan.
@@ -180,6 +198,9 @@ BEGIN
 				NS <= S0;
 		END CASE;
 
+		FOR i IN 0 TO 3 LOOP
+			REPORT "i=" & INTEGER'image(changes_array(i));
+		END LOOP;
 	END PROCESS;
 
 END behaviour;
