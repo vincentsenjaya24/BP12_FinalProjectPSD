@@ -76,7 +76,7 @@ BEGIN
 	BEGIN
 		CASE PS IS
 			WHEN S0 => -- idle
-				IF (T = "00" OR M /= "000") THEN
+				IF (T = "00" OR M /= "UUU") THEN
 					NS <= S0;-- input invalid
 				ELSE
 					CASE T IS
@@ -139,32 +139,30 @@ BEGIN
 				END IF;
 
 			WHEN S4 => -- Melakukan perhitungan uang kembalian.
-				WHILE(changeMoney > 0) LOOP
-					IF changeMoney >= 100 THEN
-						changeMoney <= changeMoney - 100;
-						C <= "111";
-					ELSIF changeMoney >= 50 THEN
-						changeMoney <= changeMoney - 50;
-						C <= "110";
-					ELSIF changeMoney >= 20 THEN
-						changeMoney <= changeMoney - 20;
-						C <= "101";
-					ELSIF changeMoney >= 10 THEN
-						changeMoney <= changeMoney - 10;
-						C <= "100";
-					ELSIF changeMoney >= 5 THEN
-						changeMoney <= changeMoney - 5;
-						C <= "011";
-					ELSIF changeMoney >= 2 THEN
-						changeMoney <= changeMoney - 2;
-						C <= "010";
-					ELSIF changeMoney >= 1 THEN
-						changeMoney <= changeMoney - 1;
-						C <= "001";
-					ELSE
-						C <= "000";
-					END IF;
-				END LOOP;
+				IF changeMoney >= 100 THEN
+					changeMoney <= changeMoney - 100;
+					C <= "111";
+				ELSIF changeMoney >= 50 THEN
+					changeMoney <= changeMoney - 50;
+					C <= "110";
+				ELSIF changeMoney >= 20 THEN
+					changeMoney <= changeMoney - 20;
+					C <= "101";
+				ELSIF changeMoney >= 10 THEN
+					changeMoney <= changeMoney - 10;
+					C <= "100";
+				ELSIF changeMoney >= 5 THEN
+					changeMoney <= changeMoney - 5;
+					C <= "011";
+				ELSIF changeMoney >= 2 THEN
+					changeMoney <= changeMoney - 2;
+					C <= "010";
+				ELSIF changeMoney >= 1 THEN
+					changeMoney <= changeMoney - 1;
+					C <= "001";
+				ELSE
+					C <= "000";
+				END IF;
 				NS <= S5;
 
 			WHEN S5 => -- Mencek apakah uang masih ada yang perlu dikembalikan.
